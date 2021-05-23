@@ -43,6 +43,8 @@ void prenumale(int *vet);
 void* readTofifo2( struct fila *f2, int *canal, int busyWait, int *nump);
 // response to show info of fifo2
 void* result(struct fila *f2, int *nump5, int *nump6 );
+// response to creat shared memory for fifos
+void CreatSharedMemory(void ** shared_memory);
 struct fila *fila_shared;
 struct fila *fila_shared2;
 
@@ -50,33 +52,17 @@ int main(){
 	pid_t  pid, pid2, pid3, pid4,pid5, pid6, pid7; // processos 
 	pthread_t thread1,thread2,thread3,thread4[2],thread5,thread6,thread7;        // Threads
 	int i, nump5=0, nump6=0;
-	key_t key=5678;
 	void *shared_memory = (void *)0;
-	int shmid, shmid1; // shared memory id
+	void *shared_memory2 = (void *)0;
+	//int shmid, shmid1; // shared memory id
 	
 	// transformar em função para f1 e f2
-	// Mostrando ao sistema a memória que será compatilhada
-	shmid = shmget(key,MEM_SZ,0666|IPC_CREAT);
-	if ( shmid == -1 )
-	{
-		printf("shmget falhou\n");
-		exit(-1);
-	}
-	
-	printf("shmid=%d\n",shmid);
-	
-	shared_memory = shmat(shmid,(void*)0,0);
-	
-	if (shared_memory == (void *) -1 )
-	{
-		printf("shmat falhou\n");
-		exit(-1);
-	}
-		
-	printf("Memoria compartilhada no endereco=%p\n", shared_memory);
-
-	fila_shared = (struct fila *) shared_memory;
-	fila_shared2= (struct fila *) shared_memory;
+	CreatSharedMemory(&shared_memory); 
+	//printf("Memoria compartilhada no endereco=%p\n", shared_memory);
+	CreatSharedMemory(&shared_memory2);
+	//printf("Memoria compartilhada no endereco=%p\n", shared_memory2);
+	fila_shared = (struct fila *) shared_memory;   
+	fila_shared2= (struct fila *) shared_memory2;
 	// vector with aleatori numbers 1-1000
 	prenumale(vet);
 	criarFila( fila_shared, 10);
@@ -159,6 +145,27 @@ void prenumale(int *vet){
 	for(cont=0;cont<11000;cont++){
 		num=rand();
 		vet[cont]=(num=0? 1:num%1000);
+	}
+}
+
+// Function that creat a shared memory
+void CreatSharedMemory(void ** shared_memory)
+{	int shmid;
+	key_t key=5678;
+	shmid = shmget(key,MEM_SZ,0666|IPC_CREAT);
+	if ( shmid == -1 )
+	{
+		printf("shmget falhou\n");
+		exit(-1);
+	}
+	
+	printf("shmid=%d\n",shmid);
+	
+	*shared_memory = shmat(shmid,(void*)0,0);
+	if (shared_memory == (void *) -1 )
+	{
+		printf("shmat falhou\n");
+		exit(-1);
 	}
 }
 
