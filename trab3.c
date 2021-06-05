@@ -73,6 +73,7 @@ int main(){
 	criarFila( fila_shared, 10);
 	criarFila( fila_shared2, 10);
 	
+	signal(SIGUSR1, sinal); // executar isso inicialmente no código
 	if ( pipe(canal1) == -1 ){ printf("Erro pipe()"); return -1; } // canal escrita fila2
 	if ( pipe(canal2) == -1 ){ printf("Erro pipe()"); return -1; } // canal escrita fila2
     srand(5);
@@ -81,9 +82,9 @@ int main(){
 					
 	if ( pid > 0 )
 	{ // p4
-		pthread_create(&thread4[0], NULL, transferePorPipe( NULL), NULL);  // inicia e executa o thread criado
+		transferePorPipe( NULL);  // inicia e executa o thread criado
 		pthread_create(&thread4[1], NULL, transferePorPipe2( NULL), NULL); // inicia e executa o thread criado
-	
+		
 		pthread_join(thread4[0], NULL); // finaliza	
 		pthread_join(thread4[1], NULL); // finaliza	
 		exit(0);
@@ -93,7 +94,7 @@ int main(){
 		if (pid2>0){
 			//p1
 			int cont=0;					
-			pthread_create(&thread1, NULL, addfila( NULL ), NULL); 
+			pthread_create(&thread1, NULL, addfila( NULL ), NULL); // sem necessidade de ptrreadcreat
 			pthread_join(thread1, NULL); // finaliza	
 			exit(0);}	
 		}else if(pid2==0){
@@ -177,9 +178,10 @@ void sinal(int p)
 {    
 	fila_shared->sinal = 1;
 	printf("\n\nestou entrando aqui %d\n",fila_shared->sinal);
+	fflush(stdout);
 }
 
-void* addfila (  void *ptr){
+void* addfila ( void *ptr){
 	while(1){
 		if (fila_shared->sinal == 0){	
 			sem_wait((sem_t*)&fila_shared->mutex);
@@ -187,10 +189,10 @@ void* addfila (  void *ptr){
 					fila_shared->dados[fila_shared->nItens+1] = vet[fila_shared->totnum]; // rand()
 					fila_shared->nItens=fila_shared->nItens+1;
 					fila_shared->totnum=fila_shared->totnum+1;
-				} else { 
-					fila_shared->sinal = 1;
-					while(fila_shared->sinal == 0); // change before
-				//	signal(SIGUSR1, sinal);
+				} else{ 	
+				//	fila_shared->sinal = 1;
+				//	while(fila_shared->sinal == 0); // change before
+					kill(getpid(),SIGUSR1);
 					}  // signal to p4
 			sem_post((sem_t*)&fila_shared->mutex);
 		}
@@ -222,18 +224,17 @@ void* transferePorPipe( void *ptr){
 	int cont=0, val=0; 
 	while (1){
         cont=0; 
-		//printf("sinal: %d\n",f->sinal);
+		//printf("entrei 1: %d\n",fila_shared->sinal);
 		if (fila_shared->sinal == 1){
 			sem_wait((sem_t*)&fila_shared->mutex); // SEMA
 				/*
 				for(cont=0;cont<10;cont++){
 					printf("%d\n",fila_shared->dados[cont]);
 				}*/
-				printf("1 sinal: %d\n",fila_shared->sinal);
 				val = fila_shared->dados[fila_shared->nItens]; // get the number of the end of row
 				write(canal1[1],&val,sizeof(int));			   // writing on chanel, conection of p4 and p5		
 				fila_shared->nItens--; 
-				if(fila_shared->nItens==-1){
+				if(fila_shared->nItens==0){
 					clearfifo(fila_shared);
 					SINALP4P5=1;
 				}
@@ -250,10 +251,9 @@ void* transferePorPipe2( void *ptr){
 	int cont=0, val=0; 
 	while (1){
         cont=0; 
-		//printf("sinal: %d\n",f->sinal);
+		//printf("entrei 2: %d\n",fila_shared->sinal);
 		if (fila_shared->sinal == 1){
 			sem_wait((sem_t*)&fila_shared->mutex); // SEMA		
-				printf("2 sinal: %d\n",fila_shared->sinal);
 				val = fila_shared->dados[fila_shared->nItens]; // get the number of the end of row
 				write(canal2[1],&val,sizeof(int));			   // writing on chanel, conection of p4 and p6		
 				fila_shared->nItens--; 
@@ -272,11 +272,13 @@ void* transferePorPipe2( void *ptr){
 void* readp5( void *ptr ){
 	int val=0;
 	while(1){	
+	//	printf("aqui em baixo:");
 		sem_wait((sem_t*)&fila_shared2->mutex); // SEMA
 			if(SINALP4P5){
 				if (fila_shared2->sinal==0){
 					if ((fila_shared2->nItens<9)){
 						read(canal1[0],&val,sizeof(int));
+						printf("%d\n",val);
 						fila_shared2->dados[fila_shared2->totnum+1] = val;
 						fila_shared2->nItens=fila_shared2->nItens+1;
 						fila_shared2->totnum=fila_shared2->totnum+1;
@@ -299,7 +301,7 @@ void* readp6( void *ptr ){
 				if (fila_shared2->sinal==1){
 					if ((fila_shared2->nItens<9)){
 						read(canal2[0],&val,sizeof(int));
-						printf("entrei aqui");
+						printf("%d\n",val);
 						fila_shared2->dados[fila_shared2->totnum+1] = val;
 						fila_shared2->nItens=fila_shared2->nItens+1;
 						fila_shared2->totnum=fila_shared2->totnum+1;
