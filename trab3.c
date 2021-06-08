@@ -197,8 +197,8 @@ void* addfila ( void *ptr){
 			 if (fila_shared->sinal == 0){		
 				if (fila_shared->nItens<9){// wait clear the fifo
 					fila_shared->nItens++;
-					num=rand();
-					fila_shared->dados[fila_shared->nItens] = (num==0? 1:num%1000);
+					num=rand()%1000;
+					fila_shared->dados[fila_shared->nItens] = (num==0? 1:num);
 				} else { 	
 				//	fila_shared->sinal = 1;
 				//	while(fila_shared->sinal == 0); // change before
@@ -342,7 +342,7 @@ void* result( void *ptr ){
 	int cont=-1;
 	while (fila_shared2->StopAllProcess==1){
 	//	printf("t1 %d\n",fila_shared2->sinal);
-		while ( fila_shared2->sinal != 2 ){if(fila_shared2->StopAllProcess==0)exit(0);} // Busy wait
+		while ( fila_shared2->sinal != 2 ){} // Busy wait
 		if(fila_shared2->StopAllProcess==0)exit(0);
 		//printf("entrei aqui");
 		if(fila_shared2->nItens>-1){
@@ -389,7 +389,7 @@ void* result2( void *ptr ){
 void* result3( void *ptr ){
 	int cont=-1;
 	while (fila_shared2->StopAllProcess==1){
-		while ( fila_shared2->sinal != 4 ){if(fila_shared2->StopAllProcess==0)exit(0);} // Busy wait
+		while ( fila_shared2->sinal != 4 ){} // Busy wait
 		if(fila_shared2->StopAllProcess==0)exit(0);
 		if(fila_shared2->nItens>-1){
 			printf("3 - numero: %d, %d\n",fila_shared2->dados[fila_shared2->nItens],fila_shared2->nItens);
