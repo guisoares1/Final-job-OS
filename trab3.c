@@ -144,10 +144,10 @@ int main(){
 			{
 				// p7	
 				result(NULL);
- 				pthread_create(&thread7[0], NULL, result2, NULL);   // inicia e executa o thread criado
-				pthread_create(&thread7[1], NULL, result3, NULL);   // inicia e executa o thread criado
-				pthread_join(thread7[0], NULL); // finaliza	
-				pthread_join(thread7[1], NULL); // finaliza 	 	
+ 			//	pthread_create(&thread7[0], NULL, result2, NULL);   // inicia e executa o thread criado
+			//	pthread_create(&thread7[1], NULL, result3, NULL);   // inicia e executa o thread criado
+			//	pthread_join(thread7[0], NULL); // finaliza	
+			//	pthread_join(thread7[1], NULL); // finaliza 	 	
 				exit(0);
 			}
 		}
@@ -382,7 +382,7 @@ void* result2( void *ptr ){
 	printf("deu certo   %d\n",fila_shared2->totnum);
 	//printf("deu certo  p5: %d, p6: %d\n",fila_shared2->QtdP5,fila_shared2->QtdP6);
 	// relatório:
-	pthread_exit(0); /* exit thread */
+	pthread_exit(0); /* exit thread 
 }
 
 void* result3( void *ptr ){
@@ -406,6 +406,6 @@ void* result3( void *ptr ){
 	printf("deu certo   %d\n",fila_shared2->totnum);
 	//printf("deu certo  p5: %d, p6: %d\n",fila_shared2->QtdP5,fila_shared2->QtdP6);
 	// relatório:
-	pthread_exit(0); /* exit thread */
-}
-*/
+	pthread_exit(0); /* exit thread 
+}*/
+
