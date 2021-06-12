@@ -271,8 +271,8 @@ void* readp5( void *ptr ){
 	int val, n=0;
 	while(fila_shared2->StopAllProcess==1){	
 		while ( fila_shared2->sinal != 0 ){if(fila_shared2->StopAllProcess==0)exit(0);}
+		fila_shared2->qtdp5++;
 		if (fila_shared2->nItens<9) {
-			fila_shared2->qtdp5++;
 			fila_shared2->nItens++;
 			n=read(canal1[0],&fila_shared2->dados[fila_shared2->nItens],sizeof(int));
 			if (n==-1){
@@ -290,8 +290,8 @@ void* readp6( void *ptr ){
 	int val,n=0;
 	while(fila_shared2->StopAllProcess==1){	
 		while ( fila_shared2->sinal != 1 ){if(fila_shared2->StopAllProcess==0)exit(0);}
+		fila_shared2->qtdp6++;
 		if (fila_shared2->nItens<9) {
-			fila_shared2->qtdp6++;
 			fila_shared2->nItens++;
 			n=read(canal2[0],&fila_shared2->dados[fila_shared2->nItens],sizeof(int));
 			if (n==-1){
@@ -326,7 +326,6 @@ void* result( void *ptr ){
 		}
 		changesinalf2(fila_shared2,3);	
 	}	
-	//relp7();
 	pthread_exit(0); /* exit thread */
 }
 
@@ -342,13 +341,11 @@ void* result2( void *ptr ){
 			fila_shared2->totnum++;
 			if (fila_shared2->totnum==10000){
 				relp7();
-				//changesinalf2(fila_shared2,0);
 				fila_shared2->StopAllProcess=0;               // response to stop all process build
 			}
 		}
 		changesinalf2(fila_shared2,4);	
 	}	
-	//relp7();
 	pthread_exit(0); /* exit thread */
 }
 
@@ -369,14 +366,12 @@ void* result3( void *ptr ){
 		}
 		changesinalf2(fila_shared2,0);	
 	}	
-	//relp7();
 	pthread_exit(0); /* exit thread */
 }
 
 void relp7(){
-//	kill(getpid(),SIGSTOP);
-//	kill(getpid(),SIGCONT);
 	printf("--------------------------------------\n");fflush(stdout);
-	printf("Números impressos   %d \n",fila_shared2->totnum);fflush(stdout);
-	printf("Tempo %f  \n",(double)((clock()-fila_shared2->timebegin)/CLOCKS_PER_SEC));fflush(stdout);	
+	printf("Números impressos %d\n",fila_shared2->totnum);fflush(stdout);
+//	printf("p5 %d,p6 %d\n",fila_shared2->qtdp5,fila_shared2->qtdp6);fflush(stdout);
+	printf("Tempo %f  \n",(double)(clock()-fila_shared2->timebegin)/CLOCKS_PER_SEC);fflush(stdout);	
 }
