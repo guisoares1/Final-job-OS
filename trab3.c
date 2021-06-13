@@ -196,7 +196,8 @@ void* addfila ( void *ptr){
 					fila_shared->nItens++;
 					num=rand()%1000;
 					fila_shared->dados[fila_shared->nItens] = (num==0? 1:num);
-				}else { 	
+				} 
+				if (fila_shared->nItens==9) { 	
 					kill(getpid(),SIGUSR1);
 				}   // signal to p4
 			}
@@ -232,7 +233,7 @@ void clearfifo( struct fila *f ){
 }
 
 void* transferePorPipe( void *ptr){
-	printf("pid 1: %d\n",getpid());
+//	printf("pid 1: %d\n",getpid());
 	while (fila_shared2->StopAllProcess==1){
 		sem_wait((sem_t*)&fila_shared->mutex); // SEMA
 			if (fila_shared->sinal == 1 && fila_shared->nItens <9){
@@ -269,20 +270,17 @@ void* transferePorPipe2( void *ptr){
 void* readp5( void *ptr ){
 	int val, n=0;
 	while(fila_shared2->StopAllProcess==1){	
-	//	while ( fila_shared2->sinal != 0 ){if(fila_shared2->StopAllProcess==0)exit(0);}
-		if(fila_shared2->sinal == 0 ){
-			if(fila_shared2->StopAllProcess==0)exit(0);
-			fila_shared2->qtdp5++;
-			if (fila_shared2->nItens<9) {
-				fila_shared2->nItens++;
-				n=read(canal1[0],&fila_shared2->dados[fila_shared2->nItens],sizeof(int));
-				if (n==-1){
-					printf("Erro!!");
-					exit(0);
-				}
+		while ( fila_shared2->sinal != 0 ){if(fila_shared2->StopAllProcess==0)exit(0);}
+		if (fila_shared2->nItens<9) {
+			fila_shared2->nItens++;
+			n=read(canal1[0],&fila_shared2->dados[fila_shared2->nItens],sizeof(int));
+			if (n==-1){
+				printf("Erro!!");
+				exit(0);
 			}
-			changesinalf2(fila_shared2,1);
 		}
+		fila_shared2->qtdp5++;
+		changesinalf2(fila_shared2,1);
 	}
 	close(canal1[0]);
 	pthread_exit(0); /* exit thread */
@@ -291,20 +289,18 @@ void* readp5( void *ptr ){
 void* readp6( void *ptr ){
 	int val,n=0;
 	while(fila_shared2->StopAllProcess==1){	
-	//	while ( fila_shared2->sinal != 1 ){if(fila_shared2->StopAllProcess==0)exit(0);}
-		if(fila_shared2->sinal == 1){
-			if(fila_shared2->StopAllProcess==0)exit(0);
-			fila_shared2->qtdp6++;
-			if (fila_shared2->nItens<9) {
-				fila_shared2->nItens++;
-				n=read(canal2[0],&fila_shared2->dados[fila_shared2->nItens],sizeof(int));
-				if (n==-1){
-					printf("Erro!!");
-					exit(0);
-				}
+		while ( fila_shared2->sinal != 1 ){if(fila_shared2->StopAllProcess==0)exit(0);}
+		
+		if (fila_shared2->nItens<9) {
+			fila_shared2->nItens++;
+			n=read(canal2[0],&fila_shared2->dados[fila_shared2->nItens],sizeof(int));
+			if (n==-1){
+				printf("Erro!!");
+				exit(0);
 			}
-			changesinalf2(fila_shared2,2);
 		}
+		
+		changesinalf2(fila_shared2,2);
 	}
 	close(canal2[0]);
 	pthread_exit(0); /* exit thread */
@@ -317,21 +313,19 @@ void changesinalf2( struct fila *f, int sinal){
 void* result( void *ptr ){
 	int cont=-1;
 	while (fila_shared2->StopAllProcess==1){
-		//while ( fila_shared2->sinal != 2 ){if(fila_shared2->StopAllProcess==0)exit(0);} // Busy wait
-		if(fila_shared2->sinal == 2){
-			if(fila_shared2->StopAllProcess==0)exit(0);
-			if(fila_shared2->nItens>-1){
-				printf("1 - numero: %d, %d\n",fila_shared2->dados[fila_shared2->nItens],fila_shared2->totnum);
-				fflush(stdout);
-				fila_shared2->nItens--; 
-				fila_shared2->totnum++;
-				if (fila_shared2->totnum==10000){
-					relp7();
-					fila_shared2->StopAllProcess=0;               // response to stop all process build 
-				}
+		while ( fila_shared2->sinal != 2 ){if(fila_shared2->StopAllProcess==0)exit(0);} // Busy wait
+		if(fila_shared2->StopAllProcess==0)exit(0);
+		if(fila_shared2->nItens>-1){
+			printf("1 - numero: %d, %d\n",fila_shared2->dados[fila_shared2->nItens],fila_shared2->totnum);
+			fflush(stdout);
+			fila_shared2->nItens--; 
+			fila_shared2->totnum++;
+			if (fila_shared2->totnum==10000){
+				relp7();
+				fila_shared2->StopAllProcess=0;               // response to stop all process build 
 			}
-			changesinalf2(fila_shared2,3);	
 		}
+		changesinalf2(fila_shared2,3);	
 	}	
 	pthread_exit(0); /* exit thread */
 }
@@ -339,21 +333,19 @@ void* result( void *ptr ){
 void* result2( void *ptr ){
 	int cont=-1;
 	while (fila_shared2->StopAllProcess==1){
-	//	while ( fila_shared2->sinal != 3 ){if(fila_shared2->StopAllProcess==0)exit(0);} // Busy wait
-		if(fila_shared2->sinal == 3){
-			if(fila_shared2->StopAllProcess==0)exit(0);
-			if(fila_shared2->nItens>-1){
-				printf("2 - numero: %d, %d\n",fila_shared2->dados[fila_shared2->nItens],fila_shared2->totnum);
-				fflush(stdout);
-				fila_shared2->nItens--; 
-				fila_shared2->totnum++;
-				if (fila_shared2->totnum==10000){
-					relp7();
-					fila_shared2->StopAllProcess=0;               // response to stop all process build
-				}
+		while ( fila_shared2->sinal != 3 ){if(fila_shared2->StopAllProcess==0)exit(0);} // Busy wait
+		if(fila_shared2->StopAllProcess==0)exit(0);
+		if(fila_shared2->nItens>-1){
+			printf("2 - numero: %d, %d\n",fila_shared2->dados[fila_shared2->nItens],fila_shared2->totnum);
+			fflush(stdout);
+			fila_shared2->nItens--; 
+			fila_shared2->totnum++;
+			if (fila_shared2->totnum==10000){
+				relp7();
+				fila_shared2->StopAllProcess=0;               // response to stop all process build
 			}
-			changesinalf2(fila_shared2,4);	
 		}
+		changesinalf2(fila_shared2,4);	
 	}	
 	pthread_exit(0); /* exit thread */
 }
@@ -361,21 +353,19 @@ void* result2( void *ptr ){
 void* result3( void *ptr ){
 	int cont=-1;
 	while (fila_shared2->StopAllProcess==1){
-	//	while ( fila_shared2->sinal != 4 ){if(fila_shared2->StopAllProcess==0)exit(0);} // Busy wait
-		if( fila_shared2->sinal == 4){
-			if(fila_shared2->StopAllProcess==0)exit(0);
-			if(fila_shared2->nItens>-1){
-				printf("3 - numero: %d, %d\n",fila_shared2->dados[fila_shared2->nItens],fila_shared2->totnum);
-				fflush(stdout);
-				fila_shared2->nItens--; 
-				fila_shared2->totnum++;
-				if (fila_shared2->totnum==10000){
-					relp7();
-					fila_shared2->StopAllProcess=0;               // response to stop all process build 
-				}
+		while ( fila_shared2->sinal != 4 ){if(fila_shared2->StopAllProcess==0)exit(0);} // Busy wait
+		if(fila_shared2->StopAllProcess==0)exit(0);
+		if(fila_shared2->nItens>-1){
+			printf("3 - numero: %d, %d\n",fila_shared2->dados[fila_shared2->nItens],fila_shared2->totnum);
+			fflush(stdout);
+			fila_shared2->nItens--; 
+			fila_shared2->totnum++;
+			if (fila_shared2->totnum==10000){
+				relp7();
+				fila_shared2->StopAllProcess=0;               // response to stop all process build 
 			}
-			changesinalf2(fila_shared2,0);	
 		}
+		changesinalf2(fila_shared2,0);	
 	}	
 	pthread_exit(0); /* exit thread */
 }
@@ -383,6 +373,6 @@ void* result3( void *ptr ){
 void relp7(){
 	printf("--------------------------------------\n");fflush(stdout);
 	printf("Números impressos %d\n",fila_shared2->totnum);fflush(stdout);
-//	printf("p5   %d,  p6 %d\n",fila_shared2->qtdp5,fila_shared2->qtdp6);fflush(stdout);
+//	printf("p5 %d,p6 %d\n",fila_shared2->qtdp5,fila_shared2->qtdp6);fflush(stdout);
 	printf("Tempo %f  \n",(double)(clock()-fila_shared2->timebegin)/CLOCKS_PER_SEC);fflush(stdout);	
 }
