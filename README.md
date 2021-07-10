@@ -6,7 +6,7 @@ multiprogramming, multiprocessing and IPC
 ## Installation
 
 Compiler used is gcc version 9.3.0. 
-We have made tests on 3 systems Linux, Solaris and FreeBSD.
+We have made tests on Linux, Solaris and FreeBSD.
 
 To instal the compiler (Gcc) use:
 ```bash
