@@ -92,7 +92,7 @@ int main(){
     srand(5);
 	signal(SIGUSR1, sinal); 
 	for(int i=0;i<7;i++) // loop will run n times (n=5)
-    {	if (i==0){
+    {	if (i==0){ 
 			if(fork() == 0)
 			{
 				//p1
