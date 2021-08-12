@@ -1,7 +1,7 @@
 # Course Completion Paper
 
 The intent is to Compare the performance of different kernels as
-multiprogramming, multiprocessing and IPC
+multiprogramming, multiprocessing and Inter-process communication.
 
 ## Installation
 
