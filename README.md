@@ -2,6 +2,7 @@
 
 The intent is to Compare the performance of different kernels as
 multiprogramming, multiprocessing and Inter-process communication.
+The project can be associated with the microservices architecture. Both the project and the microservices architecture involve breaking down a system into smaller and independent parts that work together to achieve a common goal, allowing for greater scalability and flexibility.
 
 ## Installation
 
