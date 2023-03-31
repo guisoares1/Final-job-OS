@@ -23,4 +23,4 @@ gcc trab3.c -o trab -lpthread
 ```
 
 ## Advisor
-[Rivalino Matias Júnior](http://www.ppgco.facom.ufu.br/pt-br/pessoas/rivalino-matias-junior)
+[Rivalino Matias Júnior](http://www.ppgco.facom.ufu.br/pessoas/docente/rivalino-matias-junior)
